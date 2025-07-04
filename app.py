@@ -17,7 +17,7 @@ for name in font_names:
 
 
 
-plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']
+plt.rcParams['font.sans-serif'] = ['Noto Sans CJK SC']
 plt.rcParams['axes.unicode_minus'] = False
 
 def main():
