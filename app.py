@@ -18,7 +18,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 # 设置中文字体
-plt.rcParams['font.sans-serif'] = ['Arial Unicode MS', 'SimHei', 'WenQuanYi Micro Hei']
+plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']
 plt.rcParams['axes.unicode_minus'] = False
 
 # 设置随机种子
