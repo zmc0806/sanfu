@@ -581,9 +581,9 @@ def main():
                     future_predictions['预测上限'],
                     alpha=0.3, color='red', label='95%置信区间')
     
-    plt.title('双向LSTM+注意力机制客流预测', fontsize=16,fontproperties=font_prop)
-    plt.xlabel('日期', fontsize=12,fontproperties=font_prop)
-    plt.ylabel('客流量', fontsize=12,fontproperties=font_prop)
+    plt.title('LSTM', fontsize=16,fontproperties=font_prop)
+    plt.xlabel('date', fontsize=12,fontproperties=font_prop)
+    plt.ylabel('Passenger flow', fontsize=12,fontproperties=font_prop)
 
     
     plt.legend(fontsize=12)

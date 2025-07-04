@@ -10,7 +10,7 @@ from AdvancedLSTM import AdvancedLSTMPredictor  # 假设你把核心类放入这
 
 
 def main():
-    st.title("📈 高级双向LSTM + 注意力机制客流预测系统")
+    st.title("📈 双向LSTM")
     st.write("上传包含 `日期`, `顾客数`, `假日` 等字段的 Excel 文件进行预测。")
 
     uploaded_file = st.file_uploader("上传Excel文件（例如：三福.xlsx）", type=["xlsx"])
