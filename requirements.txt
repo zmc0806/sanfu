@@ -1,7 +1,15 @@
-streamlit>=1.10.0
-pandas>=1.5.3
-numpy>=1.24.3
-matplotlib>=3.7.1
-tensorflow>=2.12.0
-scikit-learn>=1.2.2
-openpyxl>=3.1.2
+# 核心依赖
+streamlit==1.35.0
+pandas==2.2.2
+numpy==1.26.4
+matplotlib==3.8.4
+scikit-learn==1.4.2
+openpyxl==3.1.2
+
+# TensorFlow（指定兼容Python 3.13的版本）
+tensorflow==2.19.0rc0  # 预发布版本，支持Python 3.13
+tensorflow-io==0.36.0
+
+# 强制指定Python版本兼容范围
+python_version >= "3.10"
+python_version < "3.14"
