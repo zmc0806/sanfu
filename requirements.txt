@@ -1,15 +1,15 @@
-# 核心依赖（指定兼容版本，避免安装过慢）
-streamlit==1.35.0
-pandas==2.1.4  # 降低版本，加快安装
-numpy==1.26.4
-matplotlib==3.8.4
-scikit-learn==1.4.2
+# 锁定兼容Python 3.11的库版本
+streamlit==1.32.2
+pandas==1.5.3  # 彻底降低版本，避免编译错误
+numpy==1.24.3
+matplotlib==3.7.1
+scikit-learn==1.2.2
 openpyxl==3.1.2
 
-# TensorFlow（兼容Python 3.13的预发布版）
-tensorflow==2.19.0rc0
+# TensorFlow（Python 3.11兼容版）
+tensorflow==2.15.0  # 官方稳定版，支持3.11
 tensorflow-io==0.36.0
 
-# 附加依赖（确保兼容性）
-protobuf==4.25.3  # 避免TensorFlow的protobuf版本冲突
-h5py==3.11.0
+# 解决protobuf冲突
+protobuf==4.23.4
+h5py==3.10.0
