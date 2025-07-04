@@ -15,7 +15,23 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 # 数据处理
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import matplotlib.font_manager as fm
 
+import os
+
+
+# 假设字体放在 fonts 文件夹下
+font_path = os.path.join("fonts", "NotoSansCJKsc-Regular.otf")
+font_prop = fm.FontProperties(fname=font_path)
+
+# 设置为默认字体
+plt.rcParams['font.family'] = font_prop.get_name()
+plt.rcParams['font.sans-serif'] = [font_prop.get_name()]
+plt.rcParams['axes.unicode_minus'] = False
+
+print(f"✅ 使用字体: {font_prop.get_name()}")
+
+plt.rcParams['axes.unicode_minus'] = False
 # 设置随机种子
 np.random.seed(42)
 tf.random.set_seed(42)

@@ -4,22 +4,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from datetime import datetime
 from AdvancedLSTM import AdvancedLSTMPredictor  # 假设你把核心类放入这个模块
-import matplotlib.font_manager as fm
-import os
 
-
-# 假设字体放在 fonts 文件夹下
-font_path = os.path.join("fonts", "NotoSansCJKsc-Regular.otf")
-font_prop = fm.FontProperties(fname=font_path)
-
-# 设置为默认字体
-plt.rcParams['font.family'] = font_prop.get_name()
-plt.rcParams['font.sans-serif'] = [font_prop.get_name()]
-plt.rcParams['axes.unicode_minus'] = False
-
-print(f"✅ 使用字体: {font_prop.get_name()}")
-
-plt.rcParams['axes.unicode_minus'] = False
 
 
 
