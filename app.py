@@ -7,17 +7,17 @@ from AdvancedLSTM import AdvancedLSTMPredictor  # 假设你把核心类放入这
 import matplotlib.font_manager as fm
 import os
 
-font_path = os.path.join("fonts", "NotoSansCJKsc-Regular.otf")
 
-if os.path.exists(font_path):
-    font_prop = fm.FontProperties(fname=font_path)
-    # 设置全局默认字体
-    plt.rcParams['font.family'] = font_prop.get_name()
-    plt.rcParams['font.sans-serif'] = [font_prop.get_name()]
-    plt.rcParams['axes.unicode_minus'] = False
-    print(f"✅ 使用字体: {font_prop.get_name()}")
-else:
-    print("⚠️ 字体文件未找到，中文可能乱码")
+# 假设字体放在 fonts 文件夹下
+font_path = os.path.join("fonts", "NotoSansCJKsc-Regular.otf")
+font_prop = fm.FontProperties(fname=font_path)
+
+# 设置为默认字体
+plt.rcParams['font.family'] = font_prop.get_name()
+plt.rcParams['font.sans-serif'] = [font_prop.get_name()]
+plt.rcParams['axes.unicode_minus'] = False
+
+print(f"✅ 使用字体: {font_prop.get_name()}")
 
 plt.rcParams['axes.unicode_minus'] = False
 

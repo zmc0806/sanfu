@@ -16,10 +16,6 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-# 设置中文字体
-plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']
-plt.rcParams['axes.unicode_minus'] = False
-
 # 设置随机种子
 np.random.seed(42)
 tf.random.set_seed(42)
@@ -572,6 +568,8 @@ def main():
     plt.title('双向LSTM+注意力机制客流预测', fontsize=16)
     plt.xlabel('日期', fontsize=12)
     plt.ylabel('客流量', fontsize=12)
+
+    
     plt.legend(fontsize=12)
     plt.xticks(rotation=45)
     plt.grid(True, alpha=0.3)
