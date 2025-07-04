@@ -7,8 +7,12 @@ from AdvancedLSTM import AdvancedLSTMPredictor  # 假设你把核心类放入这
 
 # 设置中文显示
 import matplotlib.font_manager as fm
-for font in fm.findSystemFonts(fontpaths=None, fontext='ttf'):
-    print(fm.FontProperties(fname=font).get_name())
+
+
+font_names = sorted(set(f.get_name() for f in fm.fontManager.ttflist))
+for name in font_names:
+    print(name)
+
 
 plt.rcParams['font.sans-serif'] = ['Arial Unicode MS']
 plt.rcParams['axes.unicode_minus'] = False
