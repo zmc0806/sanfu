@@ -4,21 +4,22 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 from datetime import datetime
 from AdvancedLSTM import AdvancedLSTMPredictor  # 假设你把核心类放入这个模块
-
-# 设置中文显示
 import matplotlib.font_manager as fm
+import os
 
+# 加载本地字体
+font_path = os.path.join("fonts", "NotoSansCJKsc-Regular.otf")
+if os.path.exists(font_path):
+    font_prop = fm.FontProperties(fname=font_path)
+    plt.rcParams['font.sans-serif'] = [font_prop.get_name()]
+    print(f"✅ 使用字体: {font_prop.get_name()}")
+else:
+    print("⚠️ 字体文件未找到，中文可能乱码")
 
-
-
-font_names = sorted(set(f.name for f in fm.fontManager.ttflist))
-for name in font_names:
-    print(name)
-
-
-
-plt.rcParams['font.sans-serif'] = ['Noto Sans CJK SC']
 plt.rcParams['axes.unicode_minus'] = False
+
+
+
 
 def main():
     st.title("📈 高级双向LSTM + 注意力机制客流预测系统")
