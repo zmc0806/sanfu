@@ -223,8 +223,8 @@ if 'active_tab' not in st.session_state:
     st.session_state.active_tab = 0
 
 # 标题
-st.markdown("<h1>🚀 智能客流预测系统</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #7f8c8d;'>基于双向LSTM+注意力机制的深度学习模型</p>", unsafe_allow_html=True)
+st.markdown("<h1>🚀 客流预测</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #7f8c8d;'>双向LSTM</p>", unsafe_allow_html=True)
 
 # 侧边栏
 with st.sidebar:
