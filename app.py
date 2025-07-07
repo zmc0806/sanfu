@@ -9,6 +9,8 @@ import os
 import pickle
 warnings.filterwarnings('ignore')
 
+
+
 # 深度学习
 import tensorflow as tf
 from tensorflow import keras
@@ -21,9 +23,9 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import matplotlib.font_manager as fm
 
+# 设置matplotlib中文字体
 font_path = "fonts/NotoSansCJKsc-Regular.otf"  # 你的字体路径
 font_prop = fm.FontProperties(fname=font_path)
-
 
 # 设置页面配置
 st.set_page_config(
@@ -324,9 +326,9 @@ if uploaded_file is not None:
         st.markdown("### 📈 客流趋势")
         fig, ax = plt.subplots(figsize=(12, 5))
         ax.plot(pd.to_datetime(df['日期']), df['顾客数'], color='#3498db', linewidth=1.5)
-        ax.set_xlabel('日期', fontsize=12, fontproperties=font_prop)
-        ax.set_ylabel('客流量', fontsize=12, fontproperties=font_prop)
-        ax.set_title('历史客流趋势', fontsize=14, pad=20, fontproperties=font_prop)
+        ax.set_xlabel('日期', fontsize=12)
+        ax.set_ylabel('客流量', fontsize=12)
+        ax.set_title('历史客流趋势', fontsize=14, pad=20)
         ax.grid(True, alpha=0.3)
         plt.xticks(rotation=45)
         plt.tight_layout()
@@ -342,9 +344,9 @@ if uploaded_file is not None:
             bars = ax.bar(range(len(weekday_stats)), weekday_stats.values,
                           color=['#3498db' if i < 5 else '#e74c3c' for i in range(7)])
             ax.set_xticks(range(7))
-            ax.set_xticklabels(['周一', '周二', '周三', '周四', '周五', '周六', '周日'], fontproperties=font_prop)
-            ax.set_ylabel('平均客流量', fontproperties=font_prop)
-            ax.set_title('各星期平均客流', fontproperties=font_prop)
+            ax.set_xticklabels(['周一', '周二', '周三', '周四', '周五', '周六', '周日'])
+            ax.set_ylabel('平均客流量')
+            ax.set_title('各星期平均客流')
             ax.grid(True, alpha=0.3, axis='y')
             plt.tight_layout()
             st.pyplot(fig)
@@ -357,9 +359,9 @@ if uploaded_file is not None:
             bars = ax.bar(range(len(holiday_stats)), holiday_stats.values,
                           color=colors[:len(holiday_stats)])
             ax.set_xticks(range(len(holiday_stats)))
-            ax.set_xticklabels(holiday_stats.index, fontproperties=font_prop)
-            ax.set_ylabel('平均客流量', fontproperties=font_prop)
-            ax.set_title('假日类型平均客流', fontproperties=font_prop)
+            ax.set_xticklabels(holiday_stats.index)
+            ax.set_ylabel('平均客流量')
+            ax.set_title('假日类型平均客流')
             ax.grid(True, alpha=0.3, axis='y')
             plt.tight_layout()
             st.pyplot(fig)
@@ -441,10 +443,10 @@ if uploaded_file is not None:
                         fig1, ax1 = plt.subplots(figsize=(6, 4))
                         ax1.plot(self.history['loss'], label='训练损失', color='#3498db')
                         ax1.plot(self.history['val_loss'], label='验证损失', color='#e74c3c')
-                        ax1.set_xlabel('Epoch', fontproperties=font_prop)
-                        ax1.set_ylabel('Loss', fontproperties=font_prop)
-                        ax1.set_title('训练损失', fontproperties=font_prop)
-                        ax1.legend(fontproperties=font_prop)
+                        ax1.set_xlabel('Epoch')
+                        ax1.set_ylabel('Loss')
+                        ax1.set_title('训练损失')
+                        ax1.legend()
                         ax1.grid(True, alpha=0.3)
                         plt.tight_layout()
                         loss_placeholder.pyplot(fig1)
@@ -454,10 +456,10 @@ if uploaded_file is not None:
                         fig2, ax2 = plt.subplots(figsize=(6, 4))
                         ax2.plot(self.history['mae'], label='训练MAE', color='#3498db')
                         ax2.plot(self.history['val_mae'], label='验证MAE', color='#e74c3c')
-                        ax2.set_xlabel('Epoch', fontproperties=font_prop)
-                        ax2.set_ylabel('MAE', fontproperties=font_prop)
-                        ax2.set_title('平均绝对误差', fontproperties=font_prop)
-                        ax2.legend(fontproperties=font_prop)
+                        ax2.set_xlabel('Epoch')
+                        ax2.set_ylabel('MAE')
+                        ax2.set_title('平均绝对误差')
+                        ax2.legend()
                         ax2.grid(True, alpha=0.3)
                         plt.tight_layout()
                         mae_placeholder.pyplot(fig2)
@@ -602,10 +604,10 @@ if uploaded_file is not None:
                               predictions_df['预测上限'],
                               alpha=0.3, color='#e74c3c', label='95%置信区间')
                 
-                ax.set_xlabel('日期', fontsize=12, fontproperties=font_prop)
-                ax.set_ylabel('客流量', fontsize=12, fontproperties=font_prop)
-                ax.set_title('客流预测结果', fontsize=14, pad=20, fontproperties=font_prop)
-                ax.legend(fontsize=10, fontproperties=font_prop)
+                ax.set_xlabel('日期', fontsize=12)
+                ax.set_ylabel('客流量', fontsize=12)
+                ax.set_title('客流预测结果', fontsize=14, pad=20)
+                ax.legend(fontsize=10)
                 ax.grid(True, alpha=0.3)
                 plt.xticks(rotation=45)
                 plt.tight_layout()
@@ -638,18 +640,18 @@ if uploaded_file is not None:
         # 月度平均客流
         ax1.plot(monthly_stats.index.astype(str), monthly_stats['mean'],
                 marker='o', color='#3498db', linewidth=2, markersize=6)
-        ax1.set_title('月度平均客流趋势', fontsize=14, pad=10, fontproperties=font_prop)
-        ax1.set_xlabel('月份', fontproperties=font_prop)
-        ax1.set_ylabel('平均客流量', fontproperties=font_prop)
+        ax1.set_title('月度平均客流趋势', fontsize=14, pad=10)
+        ax1.set_xlabel('月份')
+        ax1.set_ylabel('平均客流量')
         ax1.grid(True, alpha=0.3)
         plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45)
         
         # 月度总客流
         ax2.bar(monthly_stats.index.astype(str), monthly_stats['sum'],
                color='#2ecc71', alpha=0.7)
-        ax2.set_title('月度总客流量', fontsize=14, pad=10, fontproperties=font_prop)
-        ax2.set_xlabel('月份', fontproperties=font_prop)
-        ax2.set_ylabel('总客流量', fontproperties=font_prop)
+        ax2.set_title('月度总客流量', fontsize=14, pad=10)
+        ax2.set_xlabel('月份')
+        ax2.set_ylabel('总客流量')
         ax2.grid(True, alpha=0.3, axis='y')
         plt.setp(ax2.xaxis.get_majorticklabels(), rotation=45)
         
@@ -672,10 +674,10 @@ if uploaded_file is not None:
         fig, ax = plt.subplots(figsize=(12, 6))
         sns.heatmap(heatmap_data, annot=True, fmt='.0f', cmap='YlOrRd',
                    cbar_kws={'label': '平均客流量'}, ax=ax)
-        ax.set_yticklabels(['周一', '周二', '周三', '周四', '周五', '周六', '周日'], fontproperties=font_prop)
-        ax.set_xlabel('月份', fontproperties=font_prop)
-        ax.set_ylabel('星期', fontproperties=font_prop)
-        ax.set_title('客流分布热力图', fontsize=14, pad=10, fontproperties=font_prop)
+        ax.set_yticklabels(['周一', '周二', '周三', '周四', '周五', '周六', '周日'])
+        ax.set_xlabel('月份')
+        ax.set_ylabel('星期')
+        ax.set_title('客流分布热力图', fontsize=14, pad=10)
         plt.tight_layout()
         st.pyplot(fig)
 
