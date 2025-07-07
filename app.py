@@ -16,15 +16,16 @@ from tensorflow.keras import layers, Model, Input
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
-# 数据处理
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import matplotlib as mpl
 
 # 1️⃣ 确保 SimHei.ttf 文件在你的仓库（比如放在根目录下 fonts/SimHei.ttf）
 mpl.font_manager.fontManager.addfont("fonts/simhei.ttf")  # 注册字体
 plt.rcParams['font.sans-serif'] = ['SimHei']   # 使用中文字体
 plt.rcParams['axes.unicode_minus'] = False     # 正常显示负号
+
+# 设置matplotlib中文字体
+plt.rcParams['font.sans-serif'] = ['SimHei']
+plt.rcParams['axes.unicode_minus'] = False
 
 # 设置页面配置
 st.set_page_config(
@@ -218,9 +219,11 @@ if 'predictor' not in st.session_state:
     st.session_state.predictor = LSTMPredictor()
 if 'df' not in st.session_state:
     st.session_state.df = None
+if 'active_tab' not in st.session_state:
+    st.session_state.active_tab = 0
 
 # 标题
-st.markdown("<h1>🚀 客流预测</h1>", unsafe_allow_html=True)
+st.markdown("<h1>🚀 智能客流预测系统</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #7f8c8d;'>基于双向LSTM+注意力机制的深度学习模型</p>", unsafe_allow_html=True)
 
 # 侧边栏
@@ -340,7 +343,7 @@ if uploaded_file is not None:
             st.markdown("### 📊 星期分布")
             weekday_stats = df.groupby('星期')['顾客数'].mean().sort_index()
             fig, ax = plt.subplots(figsize=(8, 5))
-            bars = ax.bar(range(len(weekday_stats)), weekday_stats.values,
+            bars = ax.bar(range(len(weekday_stats)), weekday_stats.values, 
                           color=['#3498db' if i < 5 else '#e74c3c' for i in range(7)])
             ax.set_xticks(range(7))
             ax.set_xticklabels(['周一', '周二', '周三', '周四', '周五', '周六', '周日'])
@@ -355,7 +358,7 @@ if uploaded_file is not None:
             holiday_stats = df.groupby('假日')['顾客数'].mean()
             fig, ax = plt.subplots(figsize=(8, 5))
             colors = ['#3498db', '#e74c3c', '#f39c12']
-            bars = ax.bar(range(len(holiday_stats)), holiday_stats.values,
+            bars = ax.bar(range(len(holiday_stats)), holiday_stats.values, 
                           color=colors[:len(holiday_stats)])
             ax.set_xticks(range(len(holiday_stats)))
             ax.set_xticklabels(holiday_stats.index)
@@ -372,12 +375,24 @@ if uploaded_file is not None:
             st.info("🔍 点击下方按钮开始训练模型")
             
             if st.button("🚀 开始训练", key="train_button"):
+                # 显示友好的等待提示
+                st.markdown("""
+                <div style='background-color: #d4edda; padding: 20px; border-radius: 10px; margin: 20px 0;'>
+                    <h4 style='color: #155724; margin: 0;'>🎯 模型训练已开始！</h4>
+                    <p style='color: #155724; margin: 10px 0 0 0;'>
+                        请耐心等待，训练过程大约需要 <strong>2-5分钟</strong>。<br>
+                        训练期间您可以看到实时的训练进度和损失曲线。<br>
+                        <em>提示：训练时间取决于数据量大小和参数设置。</em>
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+                
                 with st.spinner('正在准备数据...'):
                     # 创建特征
                     df_features = st.session_state.predictor.create_features(df)
                     
                     # 准备数据
-                    exclude_cols = ['日期', '门店名称', '天气', '星期', '假日', '顾客数',
+                    exclude_cols = ['日期', '门店名称', '天气', '星期', '假日', '顾客数', 
                                    '年', '月', '日', '季度']
                     feature_cols = [col for col in df_features.columns if col not in exclude_cols]
                     st.session_state.predictor.feature_cols = feature_cols
@@ -408,11 +423,12 @@ if uploaded_file is not None:
                 status_text = st.empty()
                 
                 # 构建模型
-                with st.spinner('正在构建模型...'):
+                with st.spinner('正在构建模型架构...'):
                     model = st.session_state.predictor.build_model((X.shape[1], X.shape[2]))
                     st.session_state.predictor.model = model
                 
                 # 训练历史记录
+                st.markdown("### 📊 训练监控")
                 col1, col2 = st.columns(2)
                 loss_placeholder = col1.empty()
                 mae_placeholder = col2.empty()
@@ -496,6 +512,8 @@ if uploaded_file is not None:
                 # 显示结果
                 st.success('✅ 模型训练完成！')
                 
+                # 训练结果展示
+                st.markdown("### 🎯 训练结果")
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
                     st.metric("MAE", f"{mae:.2f}")
@@ -506,15 +524,39 @@ if uploaded_file is not None:
                 with col4:
                     st.metric("MAPE", f"{mape:.2f}%")
                 
+                # 成功提示
+                st.markdown("""
+                <div style='background-color: #d1ecf1; padding: 15px; border-radius: 10px; margin: 20px 0;'>
+                    <h4 style='color: #0c5460; margin: 0;'>🎉 训练成功！</h4>
+                    <p style='color: #0c5460; margin: 10px 0 0 0;'>
+                        模型已经准备就绪，您现在可以：<br>
+                        • 前往 <strong>"预测分析"</strong> 标签页生成未来客流预测<br>
+                        • 查看上方的训练曲线了解模型收敛情况<br>
+                        • 如果对结果不满意，可以调整参数后重新训练
+                    </p>
+                </div>
+                """, unsafe_allow_html=True)
+                
                 st.session_state.model_trained = True
                 st.session_state.df_features = df_features
                 
         else:
             st.success("✅ 模型已训练完成！可以进行预测了。")
             
+            # 显示模型信息
+            st.markdown("""
+            <div style='background-color: #f0f8ff; padding: 15px; border-radius: 10px; margin: 10px 0;'>
+                <h4 style='color: #004085; margin: 0;'>📌 模型状态</h4>
+                <p style='color: #004085; margin: 5px 0;'>
+                    模型已成功训练并保存在当前会话中。<br>
+                    您可以前往"预测分析"标签页进行客流预测。
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+            
             if st.button("🔄 重新训练模型"):
                 st.session_state.model_trained = False
-                st.experimental_rerun()
+                st.rerun()
     
     with tab3:
         st.markdown("## 未来预测")
@@ -590,16 +632,16 @@ if uploaded_file is not None:
                 # 历史数据
                 hist_days = min(60, len(df_features))
                 hist_data = df_features.tail(hist_days)
-                ax.plot(hist_data['日期'], hist_data['顾客数'],
+                ax.plot(hist_data['日期'], hist_data['顾客数'], 
                        'o-', label='历史客流', markersize=4, color='#3498db')
                 
                 # 预测数据
-                ax.plot(predictions_df['日期'], predictions_df['预测客流'],
+                ax.plot(predictions_df['日期'], predictions_df['预测客流'], 
                        's-', label='预测客流', markersize=6, linewidth=2, color='#e74c3c')
                 
                 # 置信区间
-                ax.fill_between(predictions_df['日期'],
-                              predictions_df['预测下限'],
+                ax.fill_between(predictions_df['日期'], 
+                              predictions_df['预测下限'], 
                               predictions_df['预测上限'],
                               alpha=0.3, color='#e74c3c', label='95%置信区间')
                 
@@ -637,7 +679,7 @@ if uploaded_file is not None:
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))
         
         # 月度平均客流
-        ax1.plot(monthly_stats.index.astype(str), monthly_stats['mean'],
+        ax1.plot(monthly_stats.index.astype(str), monthly_stats['mean'], 
                 marker='o', color='#3498db', linewidth=2, markersize=6)
         ax1.set_title('月度平均客流趋势', fontsize=14, pad=10)
         ax1.set_xlabel('月份')
@@ -646,7 +688,7 @@ if uploaded_file is not None:
         plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45)
         
         # 月度总客流
-        ax2.bar(monthly_stats.index.astype(str), monthly_stats['sum'],
+        ax2.bar(monthly_stats.index.astype(str), monthly_stats['sum'], 
                color='#2ecc71', alpha=0.7)
         ax2.set_title('月度总客流量', fontsize=14, pad=10)
         ax2.set_xlabel('月份')
@@ -658,25 +700,27 @@ if uploaded_file is not None:
         st.pyplot(fig)
         
         # 热力图分析
-    
+        st.markdown("### 🔥 客流热力图")
         
         # 创建周-小时热力图数据（这里用星期-月份代替）
         df_temp['月'] = df_temp['日期'].dt.month
         df_temp['星期数'] = df_temp['日期'].dt.dayofweek
         heatmap_data = df_temp.pivot_table(
-            values='顾客数',
-            index='星期数',
-            columns='月',
+            values='顾客数', 
+            index='星期数', 
+            columns='月', 
             aggfunc='mean'
         )
         
         fig, ax = plt.subplots(figsize=(12, 6))
-        sns.heatmap(heatmap_data, annot=True, fmt='.0f', cmap='YlOrRd',
+        sns.heatmap(heatmap_data, annot=True, fmt='.0f', cmap='YlOrRd', 
                    cbar_kws={'label': '平均客流量'}, ax=ax)
         ax.set_yticklabels(['周一', '周二', '周三', '周四', '周五', '周六', '周日'])
         ax.set_xlabel('月份')
         ax.set_ylabel('星期')
-
+        ax.set_title('客流分布热力图', fontsize=14, pad=10)
+        plt.tight_layout()
+        st.pyplot(fig)
 
 else:
     # 欢迎页面
