@@ -16,16 +16,16 @@ from tensorflow.keras import layers, Model, Input
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
+# 数据处理
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
 import matplotlib as mpl
 
 # 1️⃣ 确保 SimHei.ttf 文件在你的仓库（比如放在根目录下 fonts/SimHei.ttf）
 mpl.font_manager.fontManager.addfont("fonts/simhei.ttf")  # 注册字体
 plt.rcParams['font.sans-serif'] = ['SimHei']   # 使用中文字体
 plt.rcParams['axes.unicode_minus'] = False     # 正常显示负号
-
-# 设置matplotlib中文字体
-plt.rcParams['font.sans-serif'] = ['SimHei']
-plt.rcParams['axes.unicode_minus'] = False
 
 # 设置页面配置
 st.set_page_config(
@@ -700,7 +700,7 @@ if uploaded_file is not None:
         st.pyplot(fig)
         
         # 热力图分析
-        st.markdown("### 🔥 客流热力图")
+     
         
         # 创建周-小时热力图数据（这里用星期-月份代替）
         df_temp['月'] = df_temp['日期'].dt.month
@@ -718,9 +718,7 @@ if uploaded_file is not None:
         ax.set_yticklabels(['周一', '周二', '周三', '周四', '周五', '周六', '周日'])
         ax.set_xlabel('月份')
         ax.set_ylabel('星期')
-        ax.set_title('客流分布热力图', fontsize=14, pad=10)
-        plt.tight_layout()
-        st.pyplot(fig)
+
 
 else:
     # 欢迎页面
