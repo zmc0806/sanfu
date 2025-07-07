@@ -9,8 +9,6 @@ import os
 import pickle
 warnings.filterwarnings('ignore')
 
-
-
 # 深度学习
 import tensorflow as tf
 from tensorflow import keras
@@ -21,11 +19,12 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 # 数据处理
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-import matplotlib.font_manager as fm
+import matplotlib as mpl
 
-# 设置matplotlib中文字体
-font_path = "fonts/NotoSansCJKsc-Regular.otf"  # 你的字体路径
-font_prop = fm.FontProperties(fname=font_path)
+# 1️⃣ 确保 SimHei.ttf 文件在你的仓库（比如放在根目录下 fonts/SimHei.ttf）
+mpl.font_manager.fontManager.addfont("fonts/SimHei.ttf")  # 注册字体
+plt.rcParams['font.sans-serif'] = ['SimHei']   # 使用中文字体
+plt.rcParams['axes.unicode_minus'] = False     # 正常显示负号
 
 # 设置页面配置
 st.set_page_config(
