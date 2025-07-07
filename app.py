@@ -220,7 +220,7 @@ if 'df' not in st.session_state:
     st.session_state.df = None
 
 # 标题
-st.markdown("<h1>🚀 智能客流预测系统</h1>", unsafe_allow_html=True)
+st.markdown("<h1>🚀 客流预测</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #7f8c8d;'>基于双向LSTM+注意力机制的深度学习模型</p>", unsafe_allow_html=True)
 
 # 侧边栏
@@ -676,9 +676,7 @@ if uploaded_file is not None:
         ax.set_yticklabels(['周一', '周二', '周三', '周四', '周五', '周六', '周日'])
         ax.set_xlabel('月份')
         ax.set_ylabel('星期')
-        ax.set_title('客流分布热力图', fontsize=14, pad=10)
-        plt.tight_layout()
-        st.pyplot(fig)
+
 
 else:
     # 欢迎页面
