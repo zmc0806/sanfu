@@ -226,6 +226,179 @@ if 'active_tab' not in st.session_state:
 def update_active_tab(tab_index):
     st.session_state.active_tab = tab_index
 
+# 训练模型函数
+def train_model():
+    # 设置当前标签页为模型训练
+    st.session_state.active_tab = 1
+    
+    # 显示友好的等待提示
+    st.markdown("""
+    <div style='background-color: #d4edda; padding: 20px; border-radius: 10px; margin: 20px 0;'>
+        <h4 style='color: #155724; margin: 0;'>🎯 模型训练已开始！</h4>
+        <p style='color: #155724; margin: 10px 0 0 0;'>
+            请耐心等待，训练过程大约需要 <strong>2-5分钟</strong>。<br>
+            训练期间您可以看到实时的训练进度和损失曲线。<br>
+            <em>提示：训练时间取决于数据量大小和参数设置。</em>
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    df = st.session_state.df
+    sequence_length = st.session_state.predictor.sequence_length
+    
+    with st.spinner('正在准备数据...'):
+        # 创建特征
+        df_features = st.session_state.predictor.create_features(df)
+        
+        # 准备数据
+        exclude_cols = ['日期', '门店名称', '天气', '星期', '假日', '顾客数', 
+                       '年', '月', '日', '季度']
+        feature_cols = [col for col in df_features.columns if col not in exclude_cols]
+        st.session_state.predictor.feature_cols = feature_cols
+        
+        features = df_features[feature_cols].values
+        target = df_features['顾客数'].values
+        
+        # 标准化
+        features_scaled = st.session_state.predictor.feature_scaler.fit_transform(features)
+        target_scaled = st.session_state.predictor.scaler.fit_transform(target.reshape(-1, 1))
+        
+        # 创建序列
+        X, y = [], []
+        for i in range(sequence_length, len(features)):
+            X.append(features_scaled[i-sequence_length:i])
+            y.append(target_scaled[i])
+        
+        X = np.array(X)
+        y = np.array(y)
+        
+        # 划分数据
+        train_size = int(len(X) * 0.8)
+        X_train, X_val = X[:train_size], X[train_size:]
+        y_train, y_val = y[:train_size], y[train_size:]
+    
+    # 训练进度条
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    # 构建模型
+    with st.spinner('正在构建模型架构...'):
+        model = st.session_state.predictor.build_model((X.shape[1], X.shape[2]))
+        st.session_state.predictor.model = model
+    
+    # 训练历史记录
+    st.markdown("### 📊 训练监控")
+    col1, col2 = st.columns(2)
+    loss_placeholder = col1.empty()
+    mae_placeholder = col2.empty()
+    
+    # 自定义回调
+    class StreamlitCallback(keras.callbacks.Callback):
+        def on_epoch_end(self, epoch, logs=None):
+            progress = (epoch + 1) / epochs
+            progress_bar.progress(progress)
+            status_text.text(f'训练进度: {epoch+1}/{epochs} 轮')
+            
+            # 更新图表
+            if hasattr(self, 'history'):
+                self.history['loss'].append(logs['loss'])
+                self.history['val_loss'].append(logs['val_loss'])
+                self.history['mae'].append(logs['mae'])
+                self.history['val_mae'].append(logs['val_mae'])
+            else:
+                self.history = {
+                    'loss': [logs['loss']],
+                    'val_loss': [logs['val_loss']],
+                    'mae': [logs['mae']],
+                    'val_mae': [logs['val_mae']]
+                }
+            
+            # 绘制损失图
+            fig1, ax1 = plt.subplots(figsize=(6, 4))
+            ax1.plot(self.history['loss'], label='训练损失', color='#3498db')
+            ax1.plot(self.history['val_loss'], label='验证损失', color='#e74c3c')
+            ax1.set_xlabel('Epoch')
+            ax1.set_ylabel('Loss')
+            ax1.set_title('训练损失')
+            ax1.legend()
+            ax1.grid(True, alpha=0.3)
+            plt.tight_layout()
+            loss_placeholder.pyplot(fig1)
+            plt.close()
+            
+            # 绘制MAE图
+            fig2, ax2 = plt.subplots(figsize=(6, 4))
+            ax2.plot(self.history['mae'], label='训练MAE', color='#3498db')
+            ax2.plot(self.history['val_mae'], label='验证MAE', color='#e74c3c')
+            ax2.set_xlabel('Epoch')
+            ax2.set_ylabel('MAE')
+            ax2.set_title('平均绝对误差')
+            ax2.legend()
+            ax2.grid(True, alpha=0.3)
+            plt.tight_layout()
+            mae_placeholder.pyplot(fig2)
+            plt.close()
+    
+    # 训练模型
+    callbacks = [
+        StreamlitCallback(),
+        EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True, verbose=0),
+        ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, verbose=0)
+    ]
+    
+    history = model.fit(
+        X_train, y_train,
+        validation_data=(X_val, y_val),
+        epochs=epochs,
+        batch_size=batch_size,
+        callbacks=callbacks,
+        verbose=0
+    )
+    
+    # 评估模型
+    y_pred_scaled = model.predict(X_val)
+    y_val_original = st.session_state.predictor.scaler.inverse_transform(y_val)
+    y_pred_original = st.session_state.predictor.scaler.inverse_transform(y_pred_scaled)
+    
+    mae = mean_absolute_error(y_val_original, y_pred_original)
+    rmse = np.sqrt(mean_squared_error(y_val_original, y_pred_original))
+    r2 = r2_score(y_val_original, y_pred_original)
+    
+    # 计算MAPE
+    mask = y_val_original.flatten() != 0
+    mape = np.mean(np.abs((y_val_original[mask] - y_pred_original[mask]) / y_val_original[mask])) * 100
+    
+    # 显示结果
+    st.success('✅ 模型训练完成！')
+    
+    # 训练结果展示
+    st.markdown("### 🎯 训练结果")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("MAE", f"{mae:.2f}")
+    with col2:
+        st.metric("RMSE", f"{rmse:.2f}")
+    with col3:
+        st.metric("R²", f"{r2:.4f}")
+    with col4:
+        st.metric("MAPE", f"{mape:.2f}%")
+    
+    # 成功提示
+    st.markdown("""
+    <div style='background-color: #d1ecf1; padding: 15px; border-radius: 10px; margin: 20px 0;'>
+        <h4 style='color: #0c5460; margin: 0;'>🎉 训练成功！</h4>
+        <p style='color: #0c5460; margin: 10px 0 0 0;'>
+            模型已经准备就绪，您现在可以：<br>
+            • 前往 <strong>"预测分析"</strong> 标签页生成未来客流预测<br>
+            • 查看上方的训练曲线了解模型收敛情况<br>
+            • 如果对结果不满意，可以调整参数后重新训练
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.session_state.model_trained = True
+    st.session_state.df_features = df_features
+
 # 标题
 st.markdown("<h1>🚀 智能客流预测系统</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #7f8c8d;'>基于双向LSTM+注意力机制的深度学习模型</p>", unsafe_allow_html=True)
@@ -377,182 +550,20 @@ if uploaded_file is not None:
         elif st.session_state.active_tab == 1:
             st.markdown("## 模型训练")
             
-            # 添加标签页切换回调
-            st.button("📊 数据概览", on_click=update_active_tab, args=[0])
-            st.button("🔮 预测分析", on_click=update_active_tab, args=[2])
-            st.button("📈 历史分析", on_click=update_active_tab, args=[3])
+            # 添加标签页切换按钮
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.button("📊 数据概览", on_click=update_active_tab, args=[0])
+            with col2:
+                st.button("🔮 预测分析", on_click=update_active_tab, args=[2])
+            with col3:
+                st.button("📈 历史分析", on_click=update_active_tab, args=[3])
             
             if not st.session_state.model_trained:
                 st.info("🔍 点击下方按钮开始训练模型")
                 
-                if st.button("🚀 开始训练", key="train_button"):
-                    # 设置当前标签页为模型训练
-                    st.session_state.active_tab = 1
-                    
-                    # 显示友好的等待提示
-                    st.markdown("""
-                    <div style='background-color: #d4edda; padding: 20px; border-radius: 10px; margin: 20px 0;'>
-                        <h4 style='color: #155724; margin: 0;'>🎯 模型训练已开始！</h4>
-                        <p style='color: #155724; margin: 10px 0 0 0;'>
-                            请耐心等待，训练过程大约需要 <strong>2-5分钟</strong>。<br>
-                            训练期间您可以看到实时的训练进度和损失曲线。<br>
-                            <em>提示：训练时间取决于数据量大小和参数设置。</em>
-                        </p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    with st.spinner('正在准备数据...'):
-                        # 创建特征
-                        df_features = st.session_state.predictor.create_features(df)
-                        
-                        # 准备数据
-                        exclude_cols = ['日期', '门店名称', '天气', '星期', '假日', '顾客数', 
-                                       '年', '月', '日', '季度']
-                        feature_cols = [col for col in df_features.columns if col not in exclude_cols]
-                        st.session_state.predictor.feature_cols = feature_cols
-                        
-                        features = df_features[feature_cols].values
-                        target = df_features['顾客数'].values
-                        
-                        # 标准化
-                        features_scaled = st.session_state.predictor.feature_scaler.fit_transform(features)
-                        target_scaled = st.session_state.predictor.scaler.fit_transform(target.reshape(-1, 1))
-                        
-                        # 创建序列
-                        X, y = [], []
-                        for i in range(sequence_length, len(features)):
-                            X.append(features_scaled[i-sequence_length:i])
-                            y.append(target_scaled[i])
-                        
-                        X = np.array(X)
-                        y = np.array(y)
-                        
-                        # 划分数据
-                        train_size = int(len(X) * 0.8)
-                        X_train, X_val = X[:train_size], X[train_size:]
-                        y_train, y_val = y[:train_size], y[train_size:]
-                    
-                    # 训练进度条
-                    progress_bar = st.progress(0)
-                    status_text = st.empty()
-                    
-                    # 构建模型
-                    with st.spinner('正在构建模型架构...'):
-                        model = st.session_state.predictor.build_model((X.shape[1], X.shape[2]))
-                        st.session_state.predictor.model = model
-                    
-                    # 训练历史记录
-                    st.markdown("### 📊 训练监控")
-                    col1, col2 = st.columns(2)
-                    loss_placeholder = col1.empty()
-                    mae_placeholder = col2.empty()
-                    
-                    # 自定义回调
-                    class StreamlitCallback(keras.callbacks.Callback):
-                        def on_epoch_end(self, epoch, logs=None):
-                            progress = (epoch + 1) / epochs
-                            progress_bar.progress(progress)
-                            status_text.text(f'训练进度: {epoch+1}/{epochs} 轮')
-                            
-                            # 更新图表
-                            if hasattr(self, 'history'):
-                                self.history['loss'].append(logs['loss'])
-                                self.history['val_loss'].append(logs['val_loss'])
-                                self.history['mae'].append(logs['mae'])
-                                self.history['val_mae'].append(logs['val_mae'])
-                            else:
-                                self.history = {
-                                    'loss': [logs['loss']],
-                                    'val_loss': [logs['val_loss']],
-                                    'mae': [logs['mae']],
-                                    'val_mae': [logs['val_mae']]
-                                }
-                            
-                            # 绘制损失图
-                            fig1, ax1 = plt.subplots(figsize=(6, 4))
-                            ax1.plot(self.history['loss'], label='训练损失', color='#3498db')
-                            ax1.plot(self.history['val_loss'], label='验证损失', color='#e74c3c')
-                            ax1.set_xlabel('Epoch')
-                            ax1.set_ylabel('Loss')
-                            ax1.set_title('训练损失')
-                            ax1.legend()
-                            ax1.grid(True, alpha=0.3)
-                            plt.tight_layout()
-                            loss_placeholder.pyplot(fig1)
-                            plt.close()
-                            
-                            # 绘制MAE图
-                            fig2, ax2 = plt.subplots(figsize=(6, 4))
-                            ax2.plot(self.history['mae'], label='训练MAE', color='#3498db')
-                            ax2.plot(self.history['val_mae'], label='验证MAE', color='#e74c3c')
-                            ax2.set_xlabel('Epoch')
-                            ax2.set_ylabel('MAE')
-                            ax2.set_title('平均绝对误差')
-                            ax2.legend()
-                            ax2.grid(True, alpha=0.3)
-                            plt.tight_layout()
-                            mae_placeholder.pyplot(fig2)
-                            plt.close()
-                    
-                    # 训练模型
-                    callbacks = [
-                        StreamlitCallback(),
-                        EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True, verbose=0),
-                        ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, verbose=0)
-                    ]
-                    
-                    history = model.fit(
-                        X_train, y_train,
-                        validation_data=(X_val, y_val),
-                        epochs=epochs,
-                        batch_size=batch_size,
-                        callbacks=callbacks,
-                        verbose=0
-                    )
-                    
-                    # 评估模型
-                    y_pred_scaled = model.predict(X_val)
-                    y_val_original = st.session_state.predictor.scaler.inverse_transform(y_val)
-                    y_pred_original = st.session_state.predictor.scaler.inverse_transform(y_pred_scaled)
-                    
-                    mae = mean_absolute_error(y_val_original, y_pred_original)
-                    rmse = np.sqrt(mean_squared_error(y_val_original, y_pred_original))
-                    r2 = r2_score(y_val_original, y_pred_original)
-                    
-                    # 计算MAPE
-                    mask = y_val_original.flatten() != 0
-                    mape = np.mean(np.abs((y_val_original[mask] - y_pred_original[mask]) / y_val_original[mask])) * 100
-                    
-                    # 显示结果
-                    st.success('✅ 模型训练完成！')
-                    
-                    # 训练结果展示
-                    st.markdown("### 🎯 训练结果")
-                    col1, col2, col3, col4 = st.columns(4)
-                    with col1:
-                        st.metric("MAE", f"{mae:.2f}")
-                    with col2:
-                        st.metric("RMSE", f"{rmse:.2f}")
-                    with col3:
-                        st.metric("R²", f"{r2:.4f}")
-                    with col4:
-                        st.metric("MAPE", f"{mape:.2f}%")
-                    
-                    # 成功提示
-                    st.markdown("""
-                    <div style='background-color: #d1ecf1; padding: 15px; border-radius: 10px; margin: 20px 0;'>
-                        <h4 style='color: #0c5460; margin: 0;'>🎉 训练成功！</h4>
-                        <p style='color: #0c5460; margin: 10px 0 0 0;'>
-                            模型已经准备就绪，您现在可以：<br>
-                            • 前往 <strong>"预测分析"</strong> 标签页生成未来客流预测<br>
-                            • 查看上方的训练曲线了解模型收敛情况<br>
-                            • 如果对结果不满意，可以调整参数后重新训练
-                        </p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    st.session_state.model_trained = True
-                    st.session_state.df_features = df_features
+                if st.button("🚀 开始训练", key="train_button", on_click=train_model):
+                    pass  # 按钮点击逻辑在train_model函数中处理
             
             else:
                 st.success("✅ 模型已训练完成！可以进行预测了。")
@@ -585,13 +596,13 @@ if uploaded_file is not None:
                         prediction_dates = []
                         
                         # 准备最后的序列
-                        last_sequence = df_features[predictor.feature_cols].iloc[-sequence_length:].values
+                        last_sequence = df_features[predictor.feature_cols].iloc[-predictor.sequence_length:].values
                         last_sequence_scaled = predictor.feature_scaler.transform(last_sequence)
                         
                         # 逐天预测
                         for day in range(forecast_days):
                             # 预测
-                            X_pred = last_sequence_scaled.reshape(1, sequence_length, -1)
+                            X_pred = last_sequence_scaled.reshape(1, predictor.sequence_length, -1)
                             pred_scaled = predictor.model.predict(X_pred, verbose=0)
                             pred = predictor.scaler.inverse_transform(pred_scaled)[0, 0]
                             predictions.append(pred)
