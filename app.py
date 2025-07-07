@@ -22,7 +22,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import matplotlib as mpl
 
 # 1️⃣ 确保 SimHei.ttf 文件在你的仓库（比如放在根目录下 fonts/SimHei.ttf）
-mpl.font_manager.fontManager.addfont("fonts/SimHei.ttf")  # 注册字体
+mpl.font_manager.fontManager.addfont("fonts/simhei.ttf")  # 注册字体
 plt.rcParams['font.sans-serif'] = ['SimHei']   # 使用中文字体
 plt.rcParams['axes.unicode_minus'] = False     # 正常显示负号
 
