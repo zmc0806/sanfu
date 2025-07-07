@@ -658,7 +658,7 @@ if uploaded_file is not None:
         st.pyplot(fig)
         
         # 热力图分析
-        st.markdown("### 🔥 客流热力图")
+    
         
         # 创建周-小时热力图数据（这里用星期-月份代替）
         df_temp['月'] = df_temp['日期'].dt.month
