@@ -223,8 +223,8 @@ if 'active_tab' not in st.session_state:
     st.session_state.active_tab = 0
 
 # 标题
-st.markdown("<h1>🚀 客流预测</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #7f8c8d;'>双向LSTM</p>", unsafe_allow_html=True)
+st.markdown("<h1>🚀 智能客流预测系统</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #7f8c8d;'>基于双向LSTM+注意力机制的深度学习模型</p>", unsafe_allow_html=True)
 
 # 侧边栏
 with st.sidebar:
@@ -700,7 +700,7 @@ if uploaded_file is not None:
         st.pyplot(fig)
         
         # 热力图分析
-     
+        st.markdown("### 🔥 客流热力图")
         
         # 创建周-小时热力图数据（这里用星期-月份代替）
         df_temp['月'] = df_temp['日期'].dt.month
@@ -718,16 +718,18 @@ if uploaded_file is not None:
         ax.set_yticklabels(['周一', '周二', '周三', '周四', '周五', '周六', '周日'])
         ax.set_xlabel('月份')
         ax.set_ylabel('星期')
-
+        ax.set_title('客流分布热力图', fontsize=14, pad=10)
+        plt.tight_layout()
+        st.pyplot(fig)
 
 else:
     # 欢迎页面
     st.markdown("""
     <div style='text-align: center; padding: 50px;'>
-        <h2>客流预测系统</h2>
+        <h2>👋 欢迎使用智能客流预测系统</h2>
         <p style='font-size: 18px; color: #7f8c8d; margin: 20px 0;'>
-            采用双向LSTM，<br>
-            能够预测未来客流趋势。
+            本系统采用先进的双向LSTM神经网络结合注意力机制，<br>
+            能够准确预测未来客流趋势，助力您的业务决策。
         </p>
         <div style='background-color: #f0f2f6; padding: 30px; border-radius: 10px; margin: 30px auto; max-width: 600px;'>
             <h3>🚀 快速开始</h3>
