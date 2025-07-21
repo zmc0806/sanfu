@@ -726,8 +726,8 @@ else:
     <div style='text-align: center; padding: 50px;'>
         <h2>👋 欢迎使用智能客流预测系统</h2>
         <p style='font-size: 18px; color: #7f8c8d; margin: 20px 0;'>
-            本系统采用先进的双向LSTM神经网络结合注意力机制，<br>
-            能够准确预测未来客流趋势，助力您的业务决策。
+            采用双向LSTM神经网络结合注意力机制，<br>
+            预测未来客流趋势。
         </p>
         <div style='background-color: #f0f2f6; padding: 30px; border-radius: 10px; margin: 30px auto; max-width: 600px;'>
             <h3>🚀 快速开始</h3>
