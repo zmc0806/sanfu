@@ -9,23 +9,21 @@ import os
 import pickle
 warnings.filterwarnings('ignore')
 
-# 深度学习
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, Model, Input
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
-# 数据处理
+
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 import matplotlib as mpl
 
-# 1️⃣ 确保 SimHei.ttf 文件在你的仓库（比如放在根目录下 fonts/SimHei.ttf）
-mpl.font_manager.fontManager.addfont("fonts/simhei.ttf")  # 注册字体
-plt.rcParams['font.sans-serif'] = ['SimHei']   # 使用中文字体
-plt.rcParams['axes.unicode_minus'] = False     # 正常显示负号
+mpl.font_manager.fontManager.addfont("fonts/simhei.ttf")  
+plt.rcParams['font.sans-serif'] = ['SimHei']
+plt.rcParams['axes.unicode_minus'] = False     
 
 # 设置页面配置
 st.set_page_config(
@@ -223,8 +221,8 @@ if 'active_tab' not in st.session_state:
     st.session_state.active_tab = 0
 
 # 标题
-st.markdown("<h1>🚀 智能客流预测系统</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #7f8c8d;'>基于双向LSTM+注意力机制的深度学习模型</p>", unsafe_allow_html=True)
+st.markdown("<h1>客流预测系统</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #7f8c8d;'>基于双向LSTM的深度学习模型</p>", unsafe_allow_html=True)
 
 # 侧边栏
 with st.sidebar:
